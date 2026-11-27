@@ -1,0 +1,15 @@
+{
+  "name": "stubborn-safe",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "الخزنة العنيدة — القفل الأول: قفل المزلاج الكتوم",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
