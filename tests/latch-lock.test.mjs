@@ -299,3 +299,27 @@ test('خطوات لوحة المفاتيح بطيئة بما يكفي ولا ت�
   assert.equal(events.some((e) => e.type === 'recoil'), false);
   assert.ok(lock.snapshot().desired < CONFIG.track.start);
 });
+
+test('محاولة التدريب بلا خدع: صفر استفزازات حتى الاكتمال', () => {
+  // التطبيق يضبط count = 0 في المحاولة الأولى ثم يقرأ القيمة نفسها لاحقاً.
+  const lock = startDrag(createLatchLock(makeConfig({ count: 0 })));
+  reachTarget(lock);
+
+  const events = tickFor(lock, CONFIG.hold.durationMs / 1000 + 0.4);
+  assert.equal(events.filter((event) => event.type === 'provoke').length, 0);
+  assert.ok(events.some((event) => event.type === 'unlock'));
+  assert.equal(lock.snapshot().phase, PHASE.OPEN);
+});
+
+test('الضبط يُقرأ في كل خطوة: توسيع النطاق على الهاتف يعمل أثناء المحاولة', () => {
+  const params = makeConfig({ count: 0 });
+  params.track = { ...CONFIG.track };
+  const lock = startDrag(createLatchLock(params));
+
+  const before = lock.snapshot().targetHalfWidth;
+  params.track.targetHalfWidth = CONFIG.track.targetHalfWidth * CONFIG.track.touchZoneMultiplier;
+  lock.tick(DT);
+  const after = lock.snapshot().targetHalfWidth;
+
+  assert.ok(Math.abs(after / before - CONFIG.track.touchZoneMultiplier) < 0.01);
+});

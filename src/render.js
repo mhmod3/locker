@@ -10,19 +10,24 @@ import { CONFIG, STRINGS } from './config.js';
 
 export const LAYOUTS = Object.freeze({
   landscape: { axis: 'x', origin: 100, length: 800, cross: 170, ringRadius: 54 },
-  portrait: { axis: 'y', origin: 56, length: 400, cross: 170, ringRadius: 58 },
+  portrait: { axis: 'y', origin: 56, length: 400, cross: 170, ringRadius: 52 },
 });
 
 const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-const toArabicDigits = (value) => String(value).replace(/\d/g, (digit) => ARABIC_DIGITS[Number(digit)]);
+export const toArabicDigits = (value) =>
+  String(value).replace(/\d/g, (digit) => ARABIC_DIGITS[Number(digit)]);
 const svgNS = 'http://www.w3.org/2000/svg';
 
-export function createRenderer(doc = document) {
+export function createRenderer(doc = document, options = {}) {
+  const onLayout = options.onLayout ?? null;
   const app = doc.getElementById('app');
   const rig = doc.getElementById('rig');
   const notice = doc.getElementById('notice');
   const noticeText = doc.getElementById('noticeText');
   const readoutValue = doc.getElementById('readoutValue');
+  const readoutLabel = doc.getElementById('readoutLabel');
+  const guidance = doc.getElementById('guidance');
+  const doneReport = doc.getElementById('doneReport');
   const done = doc.getElementById('done');
   const replayBtn = doc.getElementById('replayBtn');
   const soundBtn = doc.getElementById('soundBtn');
@@ -114,6 +119,7 @@ export function createRenderer(doc = document) {
     const portrait = Boolean(layoutQuery?.matches);
     app.dataset.layout = portrait ? 'portrait' : 'landscape';
     rig.setAttribute('aria-orientation', portrait ? 'vertical' : 'horizontal');
+    if (onLayout) onLayout(portrait ? 'portrait' : 'landscape');
   }
 
   syncLayout();
@@ -151,6 +157,46 @@ export function createRenderer(doc = document) {
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
   let lastAria = '';
   let lastReadout = '';
+  let lastLabel = '';
+  let lastGuide = '';
+  let guideIsReason = false;
+  /** رسالة سبب الفشل تبقى على الشاشة مدةً قبل أن يعود السطر إلى التوجيه العادي. */
+  let guideLockUntil = 0;
+
+  /**
+   * سطر واحد يشرح الوضع الحالي: أين الهدف، هل أنت داخله، وماذا تفعل الآن.
+   * القاعدة: نصّ إرشادي واحد في كل لحظة، لا أكثر.
+   */
+  function contextualGuide(state) {
+    const inZone = Math.abs(state.position - state.targetCenter) <= state.targetHalfWidth;
+    if (state.phase === 'open') return STRINGS.guideOpen;
+    if (state.phase === 'holding') return inZone ? STRINGS.guideHold : STRINGS.guideOut;
+    if (state.progress > 0.002 && !inZone) return STRINGS.guideDrain;
+    if (state.grabbed) return inZone ? STRINGS.guideEnter : STRINGS.guideApproach;
+    if (state.progress > 0.002) return STRINGS.guideDrain;
+    return state.failCount > 0 ? STRINGS.guideRest : STRINGS.guideIdle;
+  }
+
+  function setGuide(text, { reason = false } = {}) {
+    if (!guidance || !text) return;
+    if (text === lastGuide && reason === guideIsReason) return;
+    lastGuide = text;
+    guideIsReason = reason;
+    guidance.textContent = text;
+    guidance.classList.toggle('is-reason', reason);
+  }
+
+  /** يعلّق سطر الشرح على سبب الفشل ثم يعيده إلى التوجيه اللحظي. */
+  function announceGuide(text, holdMs = 4200) {
+    if (!guidance) return;
+    guideLockUntil = performance.now() + holdMs;
+    setGuide(text, { reason: true });
+  }
+
+  /** إمساك المزلاج من جديد يلغي بقية رسالة السبب. */
+  function releaseGuide() {
+    guideLockUntil = 0;
+  }
   let noticeTimer = null;
   let completionTimer = null;
 
@@ -190,6 +236,25 @@ export function createRenderer(doc = document) {
     }
     app.classList.toggle('is-charging', progress > 0.002);
 
+    /* داخل الإطار أم خارجه؟ قراءة صريحة، لا تُترك للتخمين. */
+    const inZone = Math.abs(state.position - state.targetCenter) <= state.targetHalfWidth;
+    const tracking = state.grabbed || state.phase === 'holding' || progress > 0.002;
+    const zone = tracking ? (inZone ? 'in' : 'out') : 'rest';
+    if (app.dataset.zone !== zone) app.dataset.zone = zone;
+
+    if (readoutLabel) {
+      const label = tracking && !inZone ? STRINGS.readoutOut : STRINGS.readout;
+      if (label !== lastLabel) {
+        lastLabel = label;
+        readoutLabel.textContent = label;
+      }
+    }
+
+    /* التوجيه اللحظي: يتوقف عند رسالة سبب، ثم يعود من تلقاء نفسه. */
+    if (performance.now() >= guideLockUntil) {
+      setGuide(contextualGuide(state));
+    }
+
     const percent = Math.round(progress * 100);
     if (readoutValue) {
       const text = `${toArabicDigits(percent)}٪`;
@@ -208,6 +273,8 @@ export function createRenderer(doc = document) {
     let valueText = STRINGS.a11yIdle;
     if (state.phase === 'open') {
       valueText = STRINGS.a11yOpen;
+    } else if (state.phase === 'holding' && !inZone) {
+      valueText = STRINGS.a11yOut;
     } else if (state.phase === 'holding' || progress > 0.005) {
       valueText = STRINGS.a11yHolding(percent);
     } else if (state.phase === 'dragging') {
@@ -247,8 +314,9 @@ export function createRenderer(doc = document) {
     }
   }
 
-  function showCompletion() {
+  function showCompletion(report = '') {
     if (!done) return;
+    if (doneReport) doneReport.textContent = report;
     done.hidden = false;
     setBackgroundInert(true);
     void done.offsetWidth;
@@ -282,6 +350,8 @@ export function createRenderer(doc = document) {
   return {
     render,
     fractionFromClient,
+    announceGuide,
+    releaseGuide,
     showNotice,
     hideNotice,
     showCompletion,

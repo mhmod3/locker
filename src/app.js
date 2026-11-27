@@ -1,25 +1,93 @@
 /**
  * طبقة الربط: اللمس ولوحة المفاتيح ← منطق القفل ← العرض.
+ *
+ * مبدأ هذه الطبقة: كل حدث له سبب مفهوم. كل حيلة تُشرح في أول ظهور لها،
+ * وكل فشل يُسمّى في جملة واحدة، وأول محاولة في الجلسة تكون بلا خدع.
  */
 
 import { CONFIG, STRINGS } from './config.js';
 import { createLatchLock, PHASE } from './latch-lock.js';
-import { createRenderer } from './render.js';
+import { createRenderer, toArabicDigits } from './render.js';
 import { createSound } from './sound.js';
 
-const renderer = createRenderer(document);
-const lock = createLatchLock(CONFIG);
+/**
+ * نسخة قابلة للتعديل من الضبط. المنطق يقرأ هذه القيم في كل خطوة،
+ * لذلك يتغيّر نطاق الثبات مع اتجاه الشاشة دون إعادة بناء القفل.
+ */
+const params = {
+  ...CONFIG,
+  track: { ...CONFIG.track },
+  hold: { ...CONFIG.hold, provocation: { ...CONFIG.hold.provocation } },
+};
+
 const sound = createSound();
 
+const renderer = createRenderer(document, {
+  onLayout(layout) {
+    params.track.targetHalfWidth =
+      layout === 'portrait'
+        ? CONFIG.track.targetHalfWidth * CONFIG.track.touchZoneMultiplier
+        : CONFIG.track.targetHalfWidth;
+  },
+});
+
+/* التدريب: المحاولة الأولى في الجلسة بلا استفزازات إطلاقاً. */
+params.hold.provocation.count = 0;
+let training = Boolean(CONFIG.training.cleanAttempts);
+
+const lock = createLatchLock(params);
+
+const appEl = document.getElementById('app');
 const rig = document.getElementById('rig');
 const replayBtn = document.getElementById('replayBtn');
 const soundBtn = document.getElementById('soundBtn');
 
+/** شرح كل نوع في أول ظهور له في الجلسة. */
+const TEACHING = {
+  shift: 'teachShift',
+  squeeze: 'teachSqueeze',
+  shove: 'teachShove',
+  decoy: 'teachDecoy',
+  stall: 'teachStall',
+};
+
+const seenKinds = new Set();
 let lastHasteAt = Number.NEGATIVE_INFINITY;
 let completionEpoch = 0;
 let lastTs = performance.now();
+let lastProvokeKind = null;
+let lastProvokeAt = Number.NEGATIVE_INFINITY;
+let lastFailCause = null;
+let lastZone = 'rest';
+let lastZoneSoundAt = Number.NEGATIVE_INFINITY;
 
 const now = () => performance.now();
+
+/* --------------------------------------------------------------------------
+   الفشل: اسم السبب قبل أي شيء آخر
+   -------------------------------------------------------------------------- */
+
+function failText(event) {
+  if (event.reason === 'released') {
+    const percent = Math.round((event.progress ?? 0) * 100);
+    return percent > 0 ? STRINGS.failReleased(toArabicDigits(percent)) : STRINGS.failReleasedEarly;
+  }
+
+  const recent = now() - lastProvokeAt < 1800 ? lastProvokeKind : null;
+  if (recent === 'shift') return STRINGS.failLeftShift;
+  if (recent === 'squeeze') return STRINGS.failLeftSqueeze;
+  return STRINGS.failLeft;
+}
+
+function endTraining({ announce = true } = {}) {
+  if (!training) return;
+  training = false;
+  params.hold.provocation.count = CONFIG.hold.provocation.count;
+  if (!announce) return;
+  window.setTimeout(() => {
+    renderer.showNotice(STRINGS.tricksBegin, 'warn', { life: 4200 });
+  }, 1600);
+}
 
 function onFail(event) {
   sound.play('fail');
@@ -29,19 +97,52 @@ function onFail(event) {
     event.failCount >= CONFIG.fail.sarcasmAfter &&
     (event.failCount - CONFIG.fail.sarcasmAfter) % CONFIG.fail.sarcasmEvery === 0;
 
-  renderer.showNotice(sarcastic ? STRINGS.impatience : STRINGS.lostStillness, 'taunt');
+  renderer.showNotice(sarcastic ? STRINGS.impatience : STRINGS.lostStillness, 'taunt', {
+    life: 3600,
+  });
+  renderer.announceGuide(failText(event), 5600);
+  lastFailCause = event.reason;
+  endTraining();
+}
+
+function completionReport(snapshot) {
+  const attempts = snapshot.failCount + 1;
+  const parts = [STRINGS.doneReportAttempts(toArabicDigits(attempts))];
+  if (lastFailCause) {
+    parts.push(
+      STRINGS.doneReportReason(
+        lastFailCause === 'left' ? STRINGS.reasonLeft : STRINGS.reasonReleased,
+      ),
+    );
+  }
+  return parts.join(' · ');
 }
 
 function onUnlock() {
   sound.play('unlock');
   renderer.showNotice(STRINGS.success, 'success', { life: 3200 });
+  endTraining({ announce: false });
 
+  const report = completionReport(lock.snapshot());
   const epoch = ++completionEpoch;
   window.setTimeout(() => {
     if (epoch !== completionEpoch) return;
     renderer.hideNotice();
-    renderer.showCompletion();
+    renderer.showCompletion(report);
   }, 1900);
+}
+
+function onProvoke(event) {
+  sound.play(event.kind);
+  lastProvokeKind = event.kind;
+  lastProvokeAt = now();
+
+  const firstTime = !seenKinds.has(event.kind);
+  seenKinds.add(event.kind);
+
+  const key = firstTime ? TEACHING[event.kind] : event.notice;
+  const text = STRINGS[key];
+  if (text) renderer.showNotice(text, 'taunt', { life: firstTime ? 5600 : 3000 });
 }
 
 function handleEvents(events) {
@@ -59,12 +160,9 @@ function handleEvents(events) {
         }
         break;
 
-      case 'provoke': {
-        sound.play(event.kind);
-        const text = STRINGS[event.notice];
-        if (text) renderer.showNotice(text, 'taunt', { life: 3000 });
+      case 'provoke':
+        onProvoke(event);
         break;
-      }
 
       case 'fail':
         onFail(event);
@@ -78,6 +176,19 @@ function handleEvents(events) {
         break;
     }
   }
+}
+
+/** صوت خفيف عند الدخول والخروج من الإطار — نفس المعلومة التي يراها اللاعب. */
+function watchZone(snapshot) {
+  const zone = appEl.dataset.zone ?? 'rest';
+  if (zone === lastZone) return;
+  const changed = lastZone;
+  lastZone = zone;
+
+  if (!snapshot.grabbed || now() - lastZoneSoundAt < 220) return;
+  if (zone === 'in' && changed !== 'rest') sound.play('zoneIn');
+  else if (zone === 'out') sound.play('zoneOut');
+  lastZoneSoundAt = now();
 }
 
 /* --------------------------------------------------------------------------
@@ -101,6 +212,7 @@ rig.addEventListener('pointerdown', (event) => {
   } catch {
     /* بعض المتصفحات القديمة لا تدعم الالتقاط؛ السحب يبقى يعمل داخل العنصر. */
   }
+  renderer.releaseGuide();
   sound.play('grab');
   handleEvents(events);
 });
@@ -138,6 +250,7 @@ rig.addEventListener('keydown', (event) => {
       rig.classList.remove('is-grabbed');
     } else {
       handleEvents(lock.grab(state.position));
+      renderer.releaseGuide();
       sound.play('grab');
     }
     return;
@@ -161,6 +274,9 @@ replayBtn?.addEventListener('click', () => {
   completionEpoch += 1;
   renderer.hideCompletion();
   renderer.hideNotice();
+  renderer.releaseGuide();
+  lastFailCause = null;
+  seenKinds.clear();
   lock.reset();
   renderer.render(lock.snapshot());
   renderer.focusRig();
@@ -183,7 +299,9 @@ function frame(timestamp) {
   lastTs = timestamp;
 
   handleEvents(lock.tick(dt));
-  renderer.render(lock.snapshot());
+  const snapshot = lock.snapshot();
+  renderer.render(snapshot);
+  watchZone(snapshot);
 
   requestAnimationFrame(frame);
 }
