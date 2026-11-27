@@ -86,15 +86,14 @@
             <g class="ticks" id="ticks"></g>
 
             <g class="target-fill" id="targetFill" transform="translate(324 170)">
-              <rect class="target__fill" x="-48" y="-24" width="96" height="48" />
-              <line class="target__base" x1="-48" y1="23" x2="48" y2="23" vector-effect="non-scaling-stroke" />
+              <rect class="target__fill" x="-48" y="-34" width="96" height="68" />
             </g>
 
             <g class="decoy" id="decoy" transform="translate(600 170)">
-              <rect class="decoy__fill" x="-48" y="-24" width="96" height="48" />
+              <rect class="decoy__fill" x="-48" y="-34" width="96" height="68" />
               <path
                 class="decoy__mark"
-                d="M-48 -34 V34 M48 -34 V34 M-58 -34 H-42 M42 -34 H58 M-58 34 H-42 M42 34 H58"
+                d="M-48 -34 H48 V34 H-48 Z"
                 vector-effect="non-scaling-stroke"
               />
             </g>
@@ -106,7 +105,11 @@
                 d="M-28 -28 H28 L36 -20 V20 L28 28 H-28 L-36 20 V-20 Z"
                 transform="translate(0 3)"
               />
-              <path class="bolt__plate" d="M-28 -28 H28 L36 -20 V20 L28 28 H-28 L-36 20 V-20 Z" />
+              <path
+                class="bolt__plate"
+                fill="url(#steel)"
+                d="M-28 -28 H28 L36 -20 V20 L28 28 H-28 L-36 20 V-20 Z"
+              />
               <line class="bolt__sheen" x1="-30" y1="-24" x2="30" y2="-24" />
               <g class="bolt__knurl" id="knurl"></g>
               <circle class="bolt__screw" cx="-23" cy="0" r="2.4" />
@@ -114,9 +117,25 @@
             </g>
 
             <g class="target-marks" id="targetMarks" transform="translate(324 170)">
+              <rect
+                class="target__frame"
+                x="-48"
+                y="-34"
+                width="96"
+                height="68"
+                vector-effect="non-scaling-stroke"
+              />
               <path
-                class="target__mark"
-                d="M-48 -34 V34 M48 -34 V34 M-58 -34 H-42 M42 -34 H58 M-58 34 H-42 M42 34 H58"
+                class="target__tick"
+                d="M-58 -34 H-48 M48 -34 H58 M-58 34 H-48 M48 34 H58 M-48 -44 V-34 M48 -44 V-34 M-48 34 V44 M48 34 V44"
+                vector-effect="non-scaling-stroke"
+              />
+              <line
+                class="target__pointer"
+                x1="0"
+                y1="34"
+                x2="0"
+                y2="46"
                 vector-effect="non-scaling-stroke"
               />
             </g>
@@ -150,48 +169,56 @@
             <g class="ticks"></g>
 
             <g class="target-fill" transform="translate(170 168)">
-              <rect class="target__fill" x="-28" y="-24" width="56" height="48" />
-              <line
-                class="target__base"
-                x1="22"
-                y1="-24"
-                x2="22"
-                y2="24"
-                vector-effect="non-scaling-stroke"
-              />
+              <rect class="target__fill" x="-40" y="-36" width="80" height="72" />
             </g>
 
             <g class="decoy" transform="translate(170 300)">
-              <rect class="decoy__fill" x="-28" y="-24" width="56" height="48" />
+              <rect class="decoy__fill" x="-40" y="-36" width="80" height="72" />
               <path
                 class="decoy__mark"
-                d="M-34 -24 H34 M-34 24 H34 M-34 -24 V-32 M-34 24 V32 M34 -24 V-32 M34 24 V32"
+                d="M-40 -36 H40 V36 H-40 Z"
                 vector-effect="non-scaling-stroke"
               />
             </g>
 
             <g class="bolt" transform="translate(170 384)">
-              <circle class="bolt__ring" cx="0" cy="0" r="58" transform="rotate(-90)" />
+              <circle class="bolt__ring" cx="0" cy="0" r="52" transform="rotate(-90)" />
               <path
                 class="bolt__shadow"
-                d="M-28 -42 H28 L36 -34 V34 L28 42 H-28 L-36 34 V-34 Z"
+                d="M-30 -32 H30 L38 -24 V24 L30 32 H-30 L-38 24 V-24 Z"
                 transform="translate(0 3)"
               />
               <path
                 class="bolt__plate"
                 fill="url(#steelP)"
-                d="M-28 -42 H28 L36 -34 V34 L28 42 H-28 L-36 34 V-34 Z"
+                d="M-30 -32 H30 L38 -24 V24 L30 32 H-30 L-38 24 V-24 Z"
               />
-              <line class="bolt__sheen" x1="-29" y1="-38" x2="29" y2="-38" />
+              <line class="bolt__sheen" x1="-31" y1="-28" x2="31" y2="-28" />
               <g class="bolt__knurl"></g>
-              <circle class="bolt__screw" cx="0" cy="-27" r="2.6" />
-              <circle class="bolt__screw" cx="0" cy="27" r="2.6" />
+              <circle class="bolt__screw" cx="0" cy="-22" r="2.4" />
+              <circle class="bolt__screw" cx="0" cy="22" r="2.4" />
             </g>
 
             <g class="target-marks" transform="translate(170 168)">
+              <rect
+                class="target__frame"
+                x="-40"
+                y="-36"
+                width="80"
+                height="72"
+                vector-effect="non-scaling-stroke"
+              />
               <path
-                class="target__mark"
-                d="M-34 -24 H34 M-34 24 H34 M-34 -24 V-32 M-34 24 V32 M34 -24 V-32 M34 24 V32"
+                class="target__tick"
+                d="M-50 -36 H-40 M40 -36 H50 M-50 36 H-40 M40 36 H50 M-40 -46 V-36 M40 -46 V-36 M-40 36 V46 M40 36 V46"
+                vector-effect="non-scaling-stroke"
+              />
+              <line
+                class="target__pointer"
+                x1="40"
+                y1="0"
+                x2="54"
+                y2="0"
                 vector-effect="non-scaling-stroke"
               />
             </g>
@@ -203,7 +230,7 @@
         <div class="meter">
           <p class="guidance" id="guidance" data-string="guidance"></p>
           <p class="readout">
-            <span class="readout__label" data-string="readout"></span>
+            <span class="readout__label" id="readoutLabel" data-string="readout"></span>
             <span class="readout__value" id="readoutValue">٠٪</span>
           </p>
         </div>
@@ -226,6 +253,7 @@
           <p class="done__index" data-string="lockIndex"></p>
           <h2 class="done__title" id="doneTitle" data-string="completionTitle"></h2>
           <p class="done__sub" id="doneSub" data-string="completionSubtitle"></p>
+          <p class="done__report" id="doneReport"></p>
           <p class="done__next" data-string="nextLock"></p>
           <button class="btn btn--wide" id="replayBtn" type="button" data-string="replay"></button>
         </div>

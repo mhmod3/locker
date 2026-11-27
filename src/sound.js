@@ -102,6 +102,16 @@ export function createSound() {
       noise({ dur: 0.03, gain: 0.06, freq: 2400, q: 2 });
       noise({ dur: 0.03, gain: 0.05, freq: 2400, q: 2, delay: 0.09 });
     },
+    zoneIn() {
+      noise({ dur: 0.02, gain: 0.05, freq: 3200, q: 2.4 });
+      tone({ freq: 720, endFreq: 690, type: 'sine', dur: 0.035, gain: 0.02 });
+    },
+
+    zoneOut() {
+      tone({ freq: 240, endFreq: 168, type: 'sine', dur: 0.09, gain: 0.05 });
+      noise({ dur: 0.03, gain: 0.035, freq: 900, q: 1.4 });
+    },
+
     stall() {
       tone({ freq: 72, endFreq: 66, type: 'sine', dur: 0.18, gain: 0.055 });
     },
