@@ -86,6 +86,8 @@ body {
   line-height: 1.6;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -117,8 +119,11 @@ button {
   width: 100%;
   max-width: 1180px;
   min-height: 100dvh;
+  min-height: 100svh;
   margin: 0 auto;
-  padding: clamp(14px, 2.8vh, 28px) clamp(18px, 5vw, 64px) clamp(12px, 2.4vh, 24px);
+  padding-block: max(clamp(14px, 2.8vh, 28px), env(safe-area-inset-top))
+    max(clamp(12px, 2.4vh, 24px), env(safe-area-inset-bottom));
+  padding-inline: max(clamp(18px, 5vw, 64px), env(safe-area-inset-left), env(safe-area-inset-right));
 }
 
 .frame {
@@ -196,6 +201,7 @@ button {
 }
 
 .notice__text {
+  overflow-wrap: anywhere;
   margin: 0;
   font-size: 13px;
   font-weight: 500;
@@ -278,6 +284,30 @@ button {
   width: 100%;
   height: auto;
   overflow: visible;
+}
+
+/* مسار رأسي للهاتف: مزلاج أكبر وأقرب للإبهام.
+   شرط الوسائط هنا مطابق حرفياً لشرط `render.js`، فلا يفترق الرسم عن الهندسة. */
+.rig__svg--portrait {
+  display: none;
+}
+
+@media (max-width: 720px) and (orientation: portrait) {
+  .app .rig__svg--landscape {
+    display: none;
+  }
+
+  .app .rig__svg--portrait {
+    display: block;
+  }
+
+  .app .rig {
+    flex: none;
+    /* أعرض ما يمكن دون أن يزاحم العدّاد: ٥٨٪ من ارتفاع الشاشة كحدّ أعلى للارتفاع */
+    width: min(100%, 353px, calc(58vh * 0.6538));
+    width: min(100%, 353px, calc(58svh * 0.6538));
+    margin-inline: auto;
+  }
 }
 
 /* المسار */
@@ -393,6 +423,11 @@ button {
   fill: url(#steel);
   stroke: #14171a;
   stroke-width: 1;
+}
+
+/* المسار الرأسي له تدرّجه الخاص (الضوء من اليسار) */
+.rig__svg--portrait .bolt__plate {
+  fill: url(#steelP);
 }
 
 .bolt__sheen {
@@ -534,9 +569,11 @@ button {
     border-color var(--fast) linear;
 }
 
-.btn:hover {
-  color: var(--ink);
-  border-color: #3a3d41;
+@media (hover: hover) {
+  .btn:hover {
+    color: var(--ink);
+    border-color: #3a3d41;
+  }
 }
 
 .btn:focus-visible {
@@ -628,59 +665,157 @@ button {
    الشاشات الصغيرة
    -------------------------------------------------------------------------- */
 
-@media (max-width: 640px) {
-  .app {
-    padding: 12px 14px;
+@media (max-width: 720px) {
+  body {
+    font-size: 16px;
   }
 
-  .lead__title {
-    font-size: clamp(24px, 7.4vw, 32px);
+  .app {
+    padding-block: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-bottom));
+    padding-inline: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
+  }
+
+  .topbar {
+    gap: 10px;
+    padding-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .topbar__index {
+    font-size: 14px;
   }
 
   .notice-slot {
-    min-height: 64px;
-    padding-block: 8px;
+    min-height: 58px;
+    padding-block: 6px;
+  }
+
+  .notice {
+    max-width: 100%;
+    padding: 8px 12px;
   }
 
   .notice__text {
-    font-size: 12.5px;
+    font-size: 15.5px;
+    line-height: 1.65;
+  }
+
+  .lead {
+    margin-top: 10px;
+  }
+
+  .lead__title {
+    font-size: clamp(26px, 8vw, 32px);
   }
 
   .stage {
-    gap: 18px;
-    padding-block: 10px;
+    gap: 14px;
+    padding-block: 8px;
   }
 
   .meter {
     flex-direction: column;
     align-items: stretch;
-    gap: 6px;
+    gap: 5px;
+    padding-top: 10px;
+  }
+
+  .guidance {
+    max-width: none;
+    font-size: 15.5px;
+    line-height: 1.8;
   }
 
   .readout {
     align-self: flex-end;
+    gap: 7px;
+    font-size: 14px;
+  }
+
+  .readout__value {
+    font-size: 16px;
+  }
+
+  .btn {
+    min-height: 44px;
+    padding-inline: 18px;
+    font-size: 15px;
+  }
+
+  .foot {
+    padding-top: 6px;
   }
 
   .foot__hint {
     display: none;
   }
 
-  .guidance {
-    font-size: 12px;
+  .done__panel {
+    padding: 22px 18px 18px;
+  }
+
+  .done__title {
+    font-size: 24px;
+  }
+
+  .done__sub {
+    font-size: 15px;
+  }
+
+  .done__next {
+    font-size: 14px;
+  }
+
+  .btn--wide {
+    min-height: 48px;
+    font-size: 15px;
   }
 }
 
-@media (max-height: 620px) {
+@media (max-width: 380px) {
+  .topbar,
+  .topbar__index,
+  .guidance,
+  .notice__text {
+    font-size: 14.5px;
+  }
+
+  .lead__title {
+    font-size: 25px;
+  }
+}
+
+@media (max-height: 700px) and (max-width: 720px) {
+  .notice-slot {
+    min-height: 50px;
+  }
+
+  .stage {
+    gap: 10px;
+    padding-block: 4px;
+  }
+
+  .foot {
+    padding-top: 2px;
+  }
+}
+
+@media (max-height: 560px) {
   .foot__hint {
     display: none;
   }
 
   .notice-slot {
-    min-height: 40px;
+    min-height: 38px;
+  }
+
+  .lead__title {
+    font-size: clamp(20px, 3.2vh, 26px);
   }
 
   .stage {
-    padding-block: 6px;
+    padding-block: 4px;
+    gap: 12px;
   }
 }
 

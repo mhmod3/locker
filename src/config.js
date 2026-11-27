@@ -76,6 +76,21 @@ export const CONFIG = Object.freeze({
     lifeMs: 4200,
     hasteCooldownMs: 1500,
   },
+
+  /**
+   * الصوت: مستوى عام أعلى قليلاً من السابق، مع ضاغط يمنع الذروات المؤذية.
+   * master: 0.9؛ threshold بعدد الديسيبل السالب.
+   */
+  audio: {
+    master: 0.9,
+    compressor: {
+      threshold: -20,
+      knee: 16,
+      ratio: 4,
+      attack: 0.004,
+      release: 0.24,
+    },
+  },
 });
 
 /** كل نصوص الواجهة. استبدل القيم وحدها لتغيير النبرة. */

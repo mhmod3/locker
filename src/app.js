@@ -4,7 +4,7 @@
 
 import { CONFIG, STRINGS } from './config.js';
 import { createLatchLock, PHASE } from './latch-lock.js';
-import { createRenderer, GEOMETRY } from './render.js';
+import { createRenderer } from './render.js';
 import { createSound } from './sound.js';
 
 const renderer = createRenderer(document);
@@ -12,7 +12,6 @@ const lock = createLatchLock(CONFIG);
 const sound = createSound();
 
 const rig = document.getElementById('rig');
-const svg = rig.querySelector('svg');
 const replayBtn = document.getElementById('replayBtn');
 const soundBtn = document.getElementById('soundBtn');
 
@@ -21,16 +20,6 @@ let completionEpoch = 0;
 let lastTs = performance.now();
 
 const now = () => performance.now();
-
-function fractionFromClientX(clientX) {
-  const ctm = svg.getScreenCTM();
-  if (!ctm) return null;
-  const point = svg.createSVGPoint();
-  point.x = clientX;
-  point.y = 0;
-  const local = point.matrixTransform(ctm.inverse());
-  return (local.x - GEOMETRY.x0) / GEOMETRY.width;
-}
 
 function onFail(event) {
   sound.play('fail');
@@ -99,7 +88,7 @@ rig.addEventListener('pointerdown', (event) => {
   if (event.pointerType === 'mouse' && event.button !== 0) return;
   if (lock.snapshot().phase === PHASE.OPEN) return;
 
-  const fraction = fractionFromClientX(event.clientX);
+  const fraction = renderer.fractionFromClient(event.clientX, event.clientY);
   if (fraction === null) return;
 
   const events = lock.grab(fraction);
@@ -118,7 +107,7 @@ rig.addEventListener('pointerdown', (event) => {
 
 rig.addEventListener('pointermove', (event) => {
   if (!lock.snapshot().grabbed) return;
-  const fraction = fractionFromClientX(event.clientX);
+  const fraction = renderer.fractionFromClient(event.clientX, event.clientY);
   if (fraction === null) return;
   handleEvents(lock.move(fraction));
 });
@@ -159,8 +148,8 @@ rig.addEventListener('keydown', (event) => {
   event.preventDefault();
   if (!state.grabbed) return;
 
-  // في العربية (RTL) السهم الأيسر يدفع المزلاج نحو الهدف.
-  const towardsTarget = event.key === 'ArrowLeft' || event.key === 'ArrowDown';
+  // نحو الهدف: يسار/أعلى في المسار الأفقي والرأسي على السواء.
+  const towardsTarget = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
   handleEvents(lock.nudge(towardsTarget ? -CONFIG.input.keyStep : CONFIG.input.keyStep));
 });
 

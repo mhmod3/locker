@@ -3,6 +3,8 @@
  * لا تعمل إلا بعد أول لمسة من اللاعب (سياسة المتصفح) ويمكن كتمها بزر واحد.
  */
 
+import { CONFIG } from './config.js';
+
 export function createSound() {
   let ctx = null;
   let master = null;
@@ -14,9 +16,18 @@ export function createSound() {
     if (!AudioCtx) return null;
     if (!ctx) {
       ctx = new AudioCtx();
+      // ضاغط خفيف: يرفع الحضور دون أن تصبح الذروات مؤذية.
+      const settings = CONFIG.audio;
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.value = settings.compressor.threshold;
+      compressor.knee.value = settings.compressor.knee;
+      compressor.ratio.value = settings.compressor.ratio;
+      compressor.attack.value = settings.compressor.attack;
+      compressor.release.value = settings.compressor.release;
+
       master = ctx.createGain();
-      master.gain.value = 0.5;
-      master.connect(ctx.destination);
+      master.gain.value = settings.master;
+      master.connect(compressor).connect(ctx.destination);
     }
     if (ctx.state === 'suspended') ctx.resume().catch(() => {});
     return ctx;
@@ -63,46 +74,46 @@ export function createSound() {
 
   const voices = {
     grab() {
-      noise({ dur: 0.04, gain: 0.028, freq: 2600, q: 1.8 });
-      tone({ freq: 168, endFreq: 132, type: 'triangle', dur: 0.07, gain: 0.022 });
+      noise({ dur: 0.04, gain: 0.06, freq: 2600, q: 1.8 });
+      tone({ freq: 168, endFreq: 132, type: 'triangle', dur: 0.07, gain: 0.045 });
     },
     hold() {
-      tone({ freq: 380, endFreq: 340, type: 'sine', dur: 0.08, gain: 0.014 });
-      noise({ dur: 0.03, gain: 0.012, freq: 1200, q: 2 });
+      tone({ freq: 380, endFreq: 340, type: 'sine', dur: 0.08, gain: 0.03 });
+      noise({ dur: 0.03, gain: 0.024, freq: 1200, q: 2 });
     },
     recoil() {
-      tone({ freq: 112, endFreq: 58, type: 'sine', dur: 0.34, gain: 0.06 });
-      noise({ dur: 0.14, gain: 0.04, freq: 420, q: 0.7 });
+      tone({ freq: 112, endFreq: 58, type: 'sine', dur: 0.34, gain: 0.12 });
+      noise({ dur: 0.14, gain: 0.08, freq: 420, q: 0.7 });
     },
     shift() {
-      noise({ dur: 0.035, gain: 0.03, freq: 3400, q: 2 });
-      tone({ freq: 640, endFreq: 520, type: 'square', dur: 0.045, gain: 0.012 });
+      noise({ dur: 0.035, gain: 0.06, freq: 3400, q: 2 });
+      tone({ freq: 640, endFreq: 520, type: 'square', dur: 0.045, gain: 0.024 });
     },
     squeeze() {
-      tone({ freq: 128, endFreq: 74, type: 'sawtooth', dur: 0.5, gain: 0.016 });
-      noise({ dur: 0.4, gain: 0.014, freq: 260, q: 0.6 });
+      tone({ freq: 128, endFreq: 74, type: 'sawtooth', dur: 0.5, gain: 0.03 });
+      noise({ dur: 0.4, gain: 0.026, freq: 260, q: 0.6 });
     },
     shove() {
-      tone({ freq: 92, endFreq: 48, type: 'sine', dur: 0.26, gain: 0.055 });
-      noise({ dur: 0.1, gain: 0.03, freq: 320, q: 0.7 });
+      tone({ freq: 92, endFreq: 48, type: 'sine', dur: 0.26, gain: 0.11 });
+      noise({ dur: 0.1, gain: 0.06, freq: 320, q: 0.7 });
     },
     decoy() {
       // نقرة كاذبة تشبه تعشيق المزلاج
-      noise({ dur: 0.03, gain: 0.03, freq: 2400, q: 2 });
-      noise({ dur: 0.03, gain: 0.024, freq: 2400, q: 2, delay: 0.09 });
+      noise({ dur: 0.03, gain: 0.06, freq: 2400, q: 2 });
+      noise({ dur: 0.03, gain: 0.05, freq: 2400, q: 2, delay: 0.09 });
     },
     stall() {
-      tone({ freq: 72, endFreq: 66, type: 'sine', dur: 0.18, gain: 0.03 });
+      tone({ freq: 72, endFreq: 66, type: 'sine', dur: 0.18, gain: 0.055 });
     },
     fail() {
-      tone({ freq: 80, endFreq: 44, type: 'sine', dur: 0.8, gain: 0.06 });
-      noise({ dur: 0.3, gain: 0.035, freq: 280, q: 0.5 });
+      tone({ freq: 80, endFreq: 44, type: 'sine', dur: 0.8, gain: 0.12 });
+      noise({ dur: 0.3, gain: 0.07, freq: 280, q: 0.5 });
     },
     unlock() {
       // ثقل معدني قصير، لا نغمة موسيقية
-      tone({ freq: 118, endFreq: 52, type: 'sine', dur: 0.5, gain: 0.07 });
-      noise({ dur: 0.16, gain: 0.03, freq: 500, q: 0.6 });
-      tone({ freq: 744, endFreq: 700, type: 'triangle', dur: 0.22, gain: 0.016, delay: 0.04 });
+      tone({ freq: 118, endFreq: 52, type: 'sine', dur: 0.5, gain: 0.14 });
+      noise({ dur: 0.16, gain: 0.06, freq: 500, q: 0.6 });
+      tone({ freq: 744, endFreq: 700, type: 'triangle', dur: 0.22, gain: 0.032, delay: 0.04 });
     },
   };
 
