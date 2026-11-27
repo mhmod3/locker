@@ -1,27 +1,32 @@
 /**
  * طبقة العرض: تقرأ لقطة الحالة وتترجمها إلى SVG وواجهة.
- * لا تعرف شيئاً عن الفيزياء ولا عن اللمس.
+ * لا تعرف شيئاً عن الفيزياء ولا عن اللمس، ولا تشغّل أي حركة خاصة بها.
  */
 
 import { CONFIG, STRINGS } from './config.js';
 
 /** هندسة المسار بوحدات الـ SVG (تطابق viewBox في index.html). */
-export const GEOMETRY = Object.freeze({ x0: 100, width: 800, centerY: 170, ringRadius: 58 });
+export const GEOMETRY = Object.freeze({ x0: 100, width: 800, centerY: 170, ringRadius: 54 });
 
 const RING_CIRCUMFERENCE = 2 * Math.PI * GEOMETRY.ringRadius;
+const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+const toArabicDigits = (value) => String(value).replace(/\d/g, (digit) => ARABIC_DIGITS[Number(digit)]);
 
 export const fractionToX = (fraction) => GEOMETRY.x0 + fraction * GEOMETRY.width;
 
 export function createRenderer(doc = document) {
   const app = doc.getElementById('app');
   const rig = doc.getElementById('rig');
-  const svg = rig.querySelector('svg');
   const bolt = doc.getElementById('bolt');
   const ring = doc.getElementById('ring');
-  const target = doc.getElementById('target');
+  const targetFill = doc.getElementById('targetFill');
+  const targetMarks = doc.getElementById('targetMarks');
+  const decoy = doc.getElementById('decoy');
   const ticks = doc.getElementById('ticks');
+  const knurl = doc.getElementById('knurl');
   const notice = doc.getElementById('notice');
   const noticeText = doc.getElementById('noticeText');
+  const readoutValue = doc.getElementById('readoutValue');
   const done = doc.getElementById('done');
   const replayBtn = doc.getElementById('replayBtn');
   const soundBtn = doc.getElementById('soundBtn');
@@ -35,21 +40,36 @@ export function createRenderer(doc = document) {
   rig.setAttribute('aria-label', STRINGS.a11yLabel);
   rigHelp.textContent = STRINGS.a11yHelp;
 
+  const svgNS = 'http://www.w3.org/2000/svg';
+
   /* شُرَط المسار المحفورة */
   if (ticks) {
     const fragment = doc.createDocumentFragment();
-    const count = 20;
-    for (let i = 0; i <= count; i += 1) {
-      const x = GEOMETRY.x0 + (i / count) * GEOMETRY.width;
-      const line = doc.createElementNS('http://www.w3.org/2000/svg', 'line');
+    for (let i = 0; i <= 20; i += 1) {
+      const x = GEOMETRY.x0 + (i / 20) * GEOMETRY.width;
+      const line = doc.createElementNS(svgNS, 'line');
       line.setAttribute('x1', String(x));
       line.setAttribute('x2', String(x));
-      line.setAttribute('y1', i % 5 === 0 ? '183' : '187');
-      line.setAttribute('y2', '193');
+      line.setAttribute('y1', i % 5 === 0 ? '184' : '187');
+      line.setAttribute('y2', '192');
       if (i % 5 === 0) line.classList.add('is-major');
       fragment.appendChild(line);
     }
     ticks.appendChild(fragment);
+  }
+
+  /* نقش قبضة المزلاج */
+  if (knurl) {
+    const fragment = doc.createDocumentFragment();
+    for (let i = -3; i <= 3; i += 1) {
+      const line = doc.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', String(i * 4));
+      line.setAttribute('x2', String(i * 4));
+      line.setAttribute('y1', '-10');
+      line.setAttribute('y2', '10');
+      fragment.appendChild(line);
+    }
+    knurl.appendChild(fragment);
   }
 
   if (ring) {
@@ -57,9 +77,10 @@ export function createRenderer(doc = document) {
     ring.style.strokeDashoffset = `${RING_CIRCUMFERENCE.toFixed(2)}`;
   }
 
+  const background = [doc.querySelector('.topbar'), doc.querySelector('.lead'), doc.querySelector('.stage'), doc.querySelector('.foot')];
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-  const background = [doc.querySelector('.masthead'), doc.querySelector('.rig-wrap'), doc.querySelector('.foot')];
   let lastAria = '';
+  let lastReadout = '';
   let noticeTimer = null;
   let completionTimer = null;
 
@@ -67,25 +88,41 @@ export function createRenderer(doc = document) {
     const x = fractionToX(state.position);
     bolt.setAttribute('transform', `translate(${x.toFixed(2)} ${GEOMETRY.centerY})`);
 
+    const centerX = fractionToX(state.targetCenter);
+    const targetTransform = `translate(${centerX.toFixed(2)} ${GEOMETRY.centerY}) scale(${state.zoneScale.toFixed(4)} 1)`;
+    targetFill.setAttribute('transform', targetTransform);
+    targetMarks.setAttribute('transform', targetTransform);
+
+    const decoyOn = state.decoy !== null && state.decoy !== undefined;
+    if (decoyOn) {
+      const decoyX = fractionToX(state.decoy);
+      decoy.setAttribute('transform', `translate(${decoyX.toFixed(2)} ${GEOMETRY.centerY})`);
+    }
+    if (app.dataset.decoy !== (decoyOn ? 'on' : 'off')) {
+      app.dataset.decoy = decoyOn ? 'on' : 'off';
+    }
+
     const progress = Math.min(1, Math.max(0, state.progress));
     if (ring) {
       ring.style.strokeDashoffset = (RING_CIRCUMFERENCE * (1 - progress)).toFixed(2);
     }
-
-    const dx = (state.targetCenter - state.targetBase) * GEOMETRY.width;
-    target.style.transform = `translateX(${dx.toFixed(2)}px)`;
-
-    if (app.dataset.phase !== state.phase) app.dataset.phase = state.phase;
-    const charging = progress > 0.003;
-    app.classList.toggle('is-charging', charging);
-    rig.classList.toggle('is-grabbed', state.grabbed);
-
-    const strained = state.strain > 0.55;
-    if (app.dataset.strain !== (strained ? 'on' : 'off')) {
-      app.dataset.strain = strained ? 'on' : 'off';
-    }
+    app.classList.toggle('is-charging', progress > 0.002);
 
     const percent = Math.round(progress * 100);
+    if (readoutValue) {
+      const text = `${toArabicDigits(percent)}٪`;
+      if (text !== lastReadout) {
+        lastReadout = text;
+        readoutValue.textContent = text;
+      }
+    }
+
+    if (app.dataset.phase !== state.phase) app.dataset.phase = state.phase;
+    if (app.dataset.strain !== (state.strain > 0.55 ? 'on' : 'off')) {
+      app.dataset.strain = state.strain > 0.55 ? 'on' : 'off';
+    }
+    rig.classList.toggle('is-grabbed', state.grabbed);
+
     let valueText = STRINGS.a11yIdle;
     if (state.phase === 'open') {
       valueText = STRINGS.a11yOpen;
@@ -104,21 +141,11 @@ export function createRenderer(doc = document) {
     }
   }
 
-  function knock() {
-    if (reducedMotion?.matches) return;
-    rig.classList.remove('is-knock');
-    // إعادة تشغيل الحركة
-    void rig.offsetWidth;
-    rig.classList.add('is-knock');
-    window.setTimeout(() => rig.classList.remove('is-knock'), 460);
-  }
-
   function showNotice(text, tone = 'taunt', { life = CONFIG.notice.lifeMs } = {}) {
     if (!notice || !noticeText) return;
     window.clearTimeout(noticeTimer);
     noticeText.textContent = text;
-    notice.classList.remove('notice--warn', 'notice--taunt', 'notice--success');
-    notice.classList.add(`notice--${tone}`);
+    notice.className = `notice notice--${tone}`;
 
     if (!notice.classList.contains('is-on')) {
       void notice.offsetWidth;
@@ -132,27 +159,32 @@ export function createRenderer(doc = document) {
     notice?.classList.remove('is-on');
   }
 
+  function setBackgroundInert(value) {
+    for (const node of background) {
+      if (node) node.inert = value;
+    }
+  }
+
   function showCompletion() {
     if (!done) return;
     done.hidden = false;
-    for (const node of background) {
-      if (node) node.inert = true;
-    }
+    setBackgroundInert(true);
     void done.offsetWidth;
-    requestAnimationFrame(() => done.classList.add('is-in'));
-    completionTimer = window.setTimeout(() => replayBtn?.focus({ preventScroll: true }), 500);
+    requestAnimationFrame(() => done.classList.add('is-on'));
+    completionTimer = window.setTimeout(() => replayBtn?.focus({ preventScroll: true }), 260);
   }
 
   function hideCompletion() {
     window.clearTimeout(completionTimer);
     if (!done) return;
-    for (const node of background) {
-      if (node) node.inert = false;
-    }
-    done.classList.remove('is-in');
-    window.setTimeout(() => {
-      done.hidden = true;
-    }, reducedMotion?.matches ? 10 : 900);
+    setBackgroundInert(false);
+    done.classList.remove('is-on');
+    window.setTimeout(
+      () => {
+        done.hidden = true;
+      },
+      reducedMotion?.matches ? 0 : 220,
+    );
   }
 
   function setSoundLabel(enabled) {
@@ -167,7 +199,6 @@ export function createRenderer(doc = document) {
 
   return {
     render,
-    knock,
     showNotice,
     hideNotice,
     showCompletion,

@@ -22,25 +22,23 @@ export function createSound() {
     return ctx;
   }
 
-  function tone({ freq = 220, endFreq = freq, type = 'sine', dur = 0.2, gain = 0.05, delay = 0 }) {
+  function tone({ freq = 220, endFreq = freq, type = 'sine', dur = 0.16, gain = 0.05, delay = 0 }) {
     if (!ensure()) return;
     const t0 = ctx.currentTime + delay;
     const osc = ctx.createOscillator();
     const g = ctx.createGain();
     osc.type = type;
     osc.frequency.setValueAtTime(freq, t0);
-    if (endFreq !== freq) {
-      osc.frequency.exponentialRampToValueAtTime(Math.max(24, endFreq), t0 + dur);
-    }
+    if (endFreq !== freq) osc.frequency.exponentialRampToValueAtTime(Math.max(24, endFreq), t0 + dur);
     g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + Math.min(0.02, dur * 0.25));
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + Math.min(0.012, dur * 0.25));
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
     osc.connect(g).connect(master);
     osc.start(t0);
-    osc.stop(t0 + dur + 0.03);
+    osc.stop(t0 + dur + 0.02);
   }
 
-  function noise({ dur = 0.12, gain = 0.04, freq = 1400, q = 0.8, type = 'bandpass', delay = 0 }) {
+  function noise({ dur = 0.06, gain = 0.03, freq = 1800, q = 1, type = 'bandpass', delay = 0 }) {
     if (!ensure()) return;
     const t0 = ctx.currentTime + delay;
     const length = Math.max(1, Math.floor(ctx.sampleRate * dur));
@@ -65,27 +63,46 @@ export function createSound() {
 
   const voices = {
     grab() {
-      noise({ dur: 0.05, gain: 0.03, freq: 2400, q: 1.6 });
-      tone({ freq: 175, endFreq: 138, type: 'triangle', dur: 0.09, gain: 0.026 });
+      noise({ dur: 0.04, gain: 0.028, freq: 2600, q: 1.8 });
+      tone({ freq: 168, endFreq: 132, type: 'triangle', dur: 0.07, gain: 0.022 });
     },
     hold() {
-      tone({ freq: 430, endFreq: 392, type: 'sine', dur: 0.1, gain: 0.016 });
+      tone({ freq: 380, endFreq: 340, type: 'sine', dur: 0.08, gain: 0.014 });
+      noise({ dur: 0.03, gain: 0.012, freq: 1200, q: 2 });
     },
     recoil() {
-      tone({ freq: 118, endFreq: 60, type: 'sine', dur: 0.36, gain: 0.065 });
-      noise({ dur: 0.18, gain: 0.045, freq: 420, q: 0.6 });
+      tone({ freq: 112, endFreq: 58, type: 'sine', dur: 0.34, gain: 0.06 });
+      noise({ dur: 0.14, gain: 0.04, freq: 420, q: 0.7 });
     },
-    provoke() {
-      tone({ freq: 92, endFreq: 68, type: 'sine', dur: 0.55, gain: 0.03 });
+    shift() {
+      noise({ dur: 0.035, gain: 0.03, freq: 3400, q: 2 });
+      tone({ freq: 640, endFreq: 520, type: 'square', dur: 0.045, gain: 0.012 });
+    },
+    squeeze() {
+      tone({ freq: 128, endFreq: 74, type: 'sawtooth', dur: 0.5, gain: 0.016 });
+      noise({ dur: 0.4, gain: 0.014, freq: 260, q: 0.6 });
+    },
+    shove() {
+      tone({ freq: 92, endFreq: 48, type: 'sine', dur: 0.26, gain: 0.055 });
+      noise({ dur: 0.1, gain: 0.03, freq: 320, q: 0.7 });
+    },
+    decoy() {
+      // نقرة كاذبة تشبه تعشيق المزلاج
+      noise({ dur: 0.03, gain: 0.03, freq: 2400, q: 2 });
+      noise({ dur: 0.03, gain: 0.024, freq: 2400, q: 2, delay: 0.09 });
+    },
+    stall() {
+      tone({ freq: 72, endFreq: 66, type: 'sine', dur: 0.18, gain: 0.03 });
     },
     fail() {
-      tone({ freq: 84, endFreq: 46, type: 'sine', dur: 0.95, gain: 0.07 });
-      noise({ dur: 0.42, gain: 0.04, freq: 300, q: 0.5 });
+      tone({ freq: 80, endFreq: 44, type: 'sine', dur: 0.8, gain: 0.06 });
+      noise({ dur: 0.3, gain: 0.035, freq: 280, q: 0.5 });
     },
     unlock() {
-      tone({ freq: 523.25, type: 'sine', dur: 1.7, gain: 0.05 });
-      tone({ freq: 784, type: 'sine', dur: 1.9, gain: 0.028, delay: 0.07 });
-      noise({ dur: 0.5, gain: 0.016, freq: 3200, q: 2 });
+      // ثقل معدني قصير، لا نغمة موسيقية
+      tone({ freq: 118, endFreq: 52, type: 'sine', dur: 0.5, gain: 0.07 });
+      noise({ dur: 0.16, gain: 0.03, freq: 500, q: 0.6 });
+      tone({ freq: 744, endFreq: 700, type: 'triangle', dur: 0.22, gain: 0.016, delay: 0.04 });
     },
   };
 

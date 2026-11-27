@@ -1,31 +1,68 @@
 /* ==========================================================================
    الخزنة العنيدة — القفل الأول
-   هوية داكنة صارمة، حركة بطيئة ناعمة، وتركيز على العنصر النشط وحده.
+   لوح معدني داكن: خطوط شعرية، مساحات محسوبة، ولون إشارة واحد.
+   لا ظلال ناعمة، لا توهّج، ولا حركة زائدة.
    ========================================================================== */
+
+@font-face {
+  font-family: "Plex Arabic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/plex-arabic-400.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF,
+    U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+@font-face {
+  font-family: "Plex Arabic";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/plex-arabic-600.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF,
+    U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+@font-face {
+  font-family: "Plex Arabic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/plex-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Plex Arabic";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/plex-latin-600.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   color-scheme: dark;
 
-  --ink-900: #030406;
-  --ink-800: #06080b;
-  --ink-700: #0b0e12;
-  --ink-600: #11151a;
-  --ink-500: #191e24;
+  --bg: #0a0b0c;
+  --surface: #0d0f10;
+  --line: #232629;
+  --line-soft: #191b1d;
+  --ink: #e8e5df;
+  --ink-2: #b0aca4;
+  --ink-3: #8a857c;
+  --signal: #d6a33f;
+  --danger: #c46a45;
 
-  --bone: #e9e3d6;
-  --muted: #8b877c;
-  --muted-dim: #5d5a52;
-  --brass: #c9a86a;
-  --brass-dim: #8d7442;
-  --rust: #b4663f;
+  --font: "Plex Arabic", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Tahoma,
+    sans-serif;
 
-  --font-ui: "Noto Kufi Arabic", "Dubai", "Tajawal", "Segoe UI", "Helvetica Neue", Tahoma, sans-serif;
-  --font-display: "Amiri", "Noto Naskh Arabic", "Scheherazade New", "Times New Roman", Georgia, serif;
-
-  --ease: cubic-bezier(0.16, 0.84, 0.3, 1);
-  --ease-soft: cubic-bezier(0.24, 0.62, 0.2, 1);
-  --dur-slow: 900ms;
-  --dur-med: 620ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --fast: 120ms;
+  --base: 160ms;
 }
 
 * {
@@ -36,21 +73,20 @@ html,
 body {
   margin: 0;
   padding: 0;
-  min-height: 100%;
-  background: var(--ink-900);
+  background: var(--bg);
 }
 
 body {
   min-height: 100dvh;
   overflow-x: hidden;
   overscroll-behavior-y: none;
-  color: var(--bone);
-  font-family: var(--font-ui);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
-  background:
-    radial-gradient(120% 80% at 50% -10%, #12161d 0%, #080a0e 46%, #040507 100%),
-    var(--ink-900);
 }
 
 button {
@@ -71,247 +107,161 @@ button {
 }
 
 /* --------------------------------------------------------------------------
-   هيكل الشاشة
+   الهيكل
    -------------------------------------------------------------------------- */
 
 .app {
   position: relative;
-  isolation: isolate;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: clamp(8px, 1.6vh, 20px);
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  width: 100%;
+  max-width: 1180px;
   min-height: 100dvh;
-  padding:
-    max(14px, env(safe-area-inset-top))
-    clamp(16px, 4vw, 54px)
-    max(14px, env(safe-area-inset-bottom));
-  animation: screen-in 1600ms var(--ease-soft) both;
+  margin: 0 auto;
+  padding: clamp(14px, 2.8vh, 28px) clamp(18px, 5vw, 64px) clamp(12px, 2.4vh, 24px);
 }
 
-@keyframes screen-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* باب الخزنة: إطار صارم، شبه صامت، لا ينافس المزلاج */
-.vault {
-  position: absolute;
-  inset: clamp(8px, 1.4vw, 18px);
-  z-index: -1;
-  border-radius: 30px;
-  border: 1px solid rgba(233, 227, 214, 0.055);
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.035), transparent 62%),
-    linear-gradient(180deg, rgba(20, 24, 30, 0.55), rgba(6, 8, 11, 0.65));
-  box-shadow:
-    inset 0 0 140px rgba(0, 0, 0, 0.8),
-    inset 0 1px 0 rgba(255, 255, 255, 0.055),
-    0 40px 120px rgba(0, 0, 0, 0.55);
+.frame {
+  position: fixed;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.055);
   pointer-events: none;
-  transition: border-color var(--dur-slow) var(--ease), box-shadow var(--dur-slow) var(--ease);
-}
-
-.vault__seam {
-  position: absolute;
-  inset: 22px;
-  border-radius: 22px;
-  border: 1px solid rgba(233, 227, 214, 0.025);
-}
-
-.rivet {
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #59616a, #1b2026 62%, #0a0d10);
-  box-shadow:
-    inset 0 0 2px rgba(255, 255, 255, 0.25),
-    0 1px 2px rgba(0, 0, 0, 0.7);
-  opacity: 0.55;
-}
-
-.rivet--tl {
-  top: 18px;
-  inset-inline-start: 18px;
-}
-.rivet--tr {
-  top: 18px;
-  inset-inline-end: 18px;
-}
-.rivet--bl {
-  bottom: 18px;
-  inset-inline-start: 18px;
-}
-.rivet--br {
-  bottom: 18px;
-  inset-inline-end: 18px;
+  z-index: 1;
 }
 
 /* --------------------------------------------------------------------------
-   الترويسة
+   الشريط العلوي
    -------------------------------------------------------------------------- */
 
-.masthead {
-  text-align: center;
-  transition: opacity var(--dur-slow) var(--ease), filter var(--dur-slow) var(--ease);
-}
-
-.masthead__brand {
-  margin: 0 0 10px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--brass);
-  opacity: 0.6;
-}
-
-.masthead__title {
+.topbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.5em;
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(19px, 3vw, 27px);
-  line-height: 1.5;
-  color: var(--bone);
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-3);
+  transition: opacity var(--base) linear;
 }
 
-.masthead__lock {
-  color: var(--muted);
-  font-size: 0.8em;
+.topbar__brand {
+  flex: none;
+  color: var(--ink-2);
 }
 
-.masthead__dot {
-  color: var(--brass-dim);
+.topbar__rule {
+  flex: 1;
+  height: 1px;
+  background: var(--line-soft);
 }
 
-.masthead__name {
-  color: var(--bone);
+.topbar__index {
+  flex: none;
+  font-variant-numeric: tabular-nums;
 }
 
 /* --------------------------------------------------------------------------
-   الإشعار العلوي — لوحة معدنية بنفس طابع الخزنة
+   شريط الإشعار (مساحة محفوظة: لا يقفز التخطيط)
    -------------------------------------------------------------------------- */
+
+.notice-slot {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 6px;
+}
 
 .notice {
-  position: fixed;
-  top: max(clamp(88px, 14vh, 132px), calc(env(safe-area-inset-top) + 84px));
-  left: 50%;
-  z-index: 30;
-  width: min(560px, calc(100vw - 40px));
-  pointer-events: none;
+  width: 100%;
+  max-width: 620px;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
   opacity: 0;
-  transform: translate(-50%, -18px);
-  filter: blur(7px);
+  transform: translateY(-4px);
   transition:
-    opacity 760ms var(--ease),
-    transform 760ms var(--ease),
-    filter 760ms var(--ease);
+    opacity var(--fast) linear,
+    transform var(--fast) linear,
+    border-color var(--fast) linear,
+    background-color var(--fast) linear;
 }
 
 .notice.is-on {
   opacity: 1;
-  transform: translate(-50%, 0);
-  filter: blur(0);
-}
-
-.notice__plate {
-  position: relative;
-  padding: 15px 40px;
-  text-align: center;
-  border-radius: 3px;
-  border: 1px solid rgba(201, 168, 106, 0.16);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 42%),
-    linear-gradient(180deg, #171b21 0%, #0d1015 58%, #090c10 100%);
-  box-shadow:
-    0 30px 70px rgba(0, 0, 0, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.8);
-}
-
-.notice__plate::before,
-.notice__plate::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  margin-top: -2.5px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #6a6f75, #14171b 70%);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-  opacity: 0.8;
-}
-
-.notice__plate::before {
-  inset-inline-start: 14px;
-}
-.notice__plate::after {
-  inset-inline-end: 14px;
+  transform: translateY(0);
+  background: var(--surface);
+  border-color: var(--line);
 }
 
 .notice__text {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(15px, 2.1vw, 19px);
-  line-height: 1.9;
-  color: #ecdfc4;
-  text-wrap: balance;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--ink);
 }
 
-.notice--warn .notice__plate {
-  border-color: rgba(180, 102, 63, 0.4);
+.notice--warn.is-on {
+  border-color: rgba(196, 106, 69, 0.55);
 }
 
 .notice--warn .notice__text {
-  color: #e5bda2;
+  color: #dcae95;
 }
 
-.notice--taunt .notice__plate {
-  border-color: rgba(201, 168, 106, 0.26);
+.notice--taunt.is-on {
+  border-color: rgba(214, 163, 63, 0.45);
 }
 
 .notice--taunt .notice__text {
-  color: #f0e3c6;
+  color: #e2c893;
 }
 
-.notice--success .notice__plate {
-  border-color: rgba(233, 227, 214, 0.3);
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(201, 168, 106, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+.notice--success.is-on {
+  border-color: rgba(232, 229, 223, 0.28);
 }
 
 /* --------------------------------------------------------------------------
-   المنصة والمزلاج
+   العنوان
    -------------------------------------------------------------------------- */
 
-.rig-wrap {
+.lead {
+  margin-top: clamp(8px, 2.4vh, 22px);
+  transition: opacity var(--base) linear;
+}
+
+.lead__title {
+  margin: 0;
+  font-size: clamp(28px, 4.4vw, 42px);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+/* --------------------------------------------------------------------------
+   المنصة
+   -------------------------------------------------------------------------- */
+
+.stage {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: clamp(16px, 3.4vh, 40px);
+  gap: clamp(20px, 3.6vh, 40px);
   min-height: 0;
+  padding-block: clamp(12px, 2.4vh, 28px);
 }
 
 .rig {
-  width: min(1040px, 100%);
-  border-radius: 20px;
+  width: 100%;
+  border-radius: 2px;
   outline: none;
   cursor: grab;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+  transition: opacity var(--base) linear;
 }
 
 .rig.is-grabbed {
@@ -319,8 +269,8 @@ button {
 }
 
 .rig:focus-visible {
-  outline: 1px solid rgba(201, 168, 106, 0.45);
-  outline-offset: 16px;
+  outline: 1px solid var(--signal);
+  outline-offset: 12px;
 }
 
 .rig__svg {
@@ -330,82 +280,103 @@ button {
   overflow: visible;
 }
 
-.rail__plate {
-  fill: url(#plateFill);
-  stroke: rgba(233, 227, 214, 0.05);
+/* المسار */
+.bed__plate {
+  fill: #0d0f10;
+  stroke: #1e2124;
   stroke-width: 1;
 }
 
-.rail__lip {
-  fill: #04060a;
-  stroke: rgba(233, 227, 214, 0.055);
+.bed__edge {
+  stroke: rgba(255, 255, 255, 0.05);
   stroke-width: 1;
 }
 
-.rail__groove {
-  fill: url(#grooveFill);
-  stroke: rgba(0, 0, 0, 0.9);
-  stroke-width: 1.2;
-  transition: stroke 500ms linear;
+.slot {
+  fill: #070809;
+  stroke: #000000;
+  stroke-width: 1;
+  transition: stroke var(--fast) linear;
 }
 
-.rail__shade {
-  fill: url(#grooveShade);
-  pointer-events: none;
+.slot__bevel {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.045);
+  stroke-width: 1;
 }
 
 .ticks line {
-  stroke: rgba(233, 227, 214, 0.15);
+  stroke: #2b2e31;
   stroke-width: 1;
 }
 
 .ticks line.is-major {
-  stroke: rgba(233, 227, 214, 0.28);
-}
-
-.start-mark line {
-  stroke: rgba(201, 168, 106, 0.34);
-  stroke-width: 1;
+  stroke: #3d4145;
 }
 
 /* علامة الهدف */
-.target {
-  transition: transform 700ms var(--ease);
+.target-fill,
+.target-marks {
+  transition: opacity 90ms linear;
   will-change: transform;
 }
 
-.target__glow {
-  fill: url(#targetGlow);
-  opacity: 0.4;
-  transition: opacity 900ms var(--ease);
+.target-marks {
+  pointer-events: none;
 }
 
-.target__brace {
-  fill: none;
-  stroke: rgba(201, 168, 106, 0.5);
+.target__fill {
+  fill: var(--signal);
+  opacity: 0.07;
+  transition: opacity var(--fast) linear;
+}
+
+.app.is-charging .target__fill {
+  opacity: 0.16;
+}
+
+.target__base {
+  stroke: var(--signal);
   stroke-width: 1.5;
-  stroke-linecap: round;
-  transition: stroke 700ms var(--ease);
+  opacity: 0.5;
 }
 
-.target__cap {
+.target__mark,
+.decoy__mark {
   fill: none;
-  stroke: rgba(201, 168, 106, 0.28);
   stroke-width: 1.5;
-  stroke-linecap: round;
+  stroke-linecap: butt;
 }
 
-.target__axis {
-  stroke: rgba(233, 227, 214, 0.12);
-  stroke-width: 1;
-  stroke-dasharray: 2 7;
+.target__mark {
+  stroke: var(--signal);
+  opacity: 0.85;
 }
 
-.target__label {
-  fill: rgba(201, 168, 106, 0.5);
-  font-family: var(--font-display);
-  font-size: 13px;
-  text-anchor: middle;
+/* علامة مضلِّلة */
+.decoy {
+  opacity: 0;
+  transition: opacity 90ms linear;
+  pointer-events: none;
+}
+
+.decoy__fill {
+  fill: var(--ink);
+  opacity: 0.05;
+}
+
+.decoy__mark {
+  stroke: var(--ink);
+  opacity: 0.45;
+}
+
+.app[data-decoy="on"] .decoy {
+  opacity: 1;
+}
+
+.app[data-decoy="on"] .target-fill,
+.app[data-decoy="on"] .target-marks {
+  opacity: 0.26;
 }
 
 /* المزلاج */
@@ -413,217 +384,178 @@ button {
   will-change: transform;
 }
 
-.bolt__halo {
-  fill: url(#chargeGlow);
-  opacity: 0;
-  transition: opacity 900ms var(--ease);
-}
-
-.app.is-charging .bolt__halo {
-  opacity: 1;
-}
-
-.bolt__ring-track {
-  fill: none;
-  stroke: rgba(233, 227, 214, 0.16);
-  stroke-width: 1;
-  stroke-dasharray: 2 7;
-  opacity: 0;
-  transition: opacity 800ms var(--ease);
-}
-
-.app.is-charging .bolt__ring-track {
-  opacity: 0.5;
-}
-
-.bolt__ring {
-  fill: none;
-  stroke: url(#brassLine);
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  opacity: 0;
-  transition: opacity 520ms var(--ease);
-}
-
-.app.is-charging .bolt__ring {
-  opacity: 1;
+.bolt__shadow {
+  fill: #000000;
+  opacity: 0.55;
 }
 
 .bolt__plate {
   fill: url(#steel);
-  stroke: #191e24;
+  stroke: #14171a;
   stroke-width: 1;
 }
 
 .bolt__sheen {
-  fill: url(#sheen);
-}
-
-.bolt__score {
-  stroke: rgba(18, 22, 27, 0.5);
-  stroke-width: 1.2;
-}
-
-.bolt__pin {
-  fill: url(#brass);
-  stroke: rgba(0, 0, 0, 0.6);
+  stroke: rgba(255, 255, 255, 0.3);
   stroke-width: 1;
 }
 
-.bolt__pin-core {
-  fill: rgba(24, 18, 8, 0.55);
+.bolt__knurl line {
+  stroke: rgba(9, 11, 13, 0.5);
+  stroke-width: 1.2;
 }
 
-.bolt__stud {
-  fill: rgba(15, 18, 22, 0.4);
+.bolt__screw {
+  fill: rgba(8, 10, 12, 0.55);
 }
 
-/* إجهاد التسرّع: تلوين خفيف قبل الارتداد */
-.app[data-strain="on"] .rail__groove {
-  stroke: rgba(180, 102, 63, 0.55);
+.bolt__ring {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 1.5;
+  opacity: 0;
+  transition: opacity var(--fast) linear;
 }
 
-.app[data-strain="on"] .target__brace {
-  stroke: rgba(203, 133, 96, 0.75);
+.app.is-charging .bolt__ring {
+  opacity: 0.9;
 }
 
-/* ارتداد ميكانيكي هادئ */
-@keyframes knock {
-  0% {
-    transform: translateX(0);
-  }
-  22% {
-    transform: translateX(2.4px);
-  }
-  48% {
-    transform: translateX(-1.6px);
-  }
-  72% {
-    transform: translateX(0.7px);
-  }
-  100% {
-    transform: translateX(0);
-  }
+.start-mark {
+  stroke: #3d4145;
+  stroke-width: 1;
 }
 
-.rig.is-knock .rail {
-  animation: knock 380ms var(--ease-soft);
+/* كتم الاندفاع: لون واحد على حافة المسار، بلا حركة */
+.app[data-strain="on"] .slot {
+  stroke: var(--danger);
 }
 
-/* الثبات: الهدف يتنفّس بهدوء شديد */
-.app[data-phase="holding"] .target__glow {
-  opacity: 0.85;
-  animation: breathe 4.8s ease-in-out infinite;
+/* التركيز على العنصر النشط */
+.app[data-phase="dragging"] .lead,
+.app[data-phase="holding"] .lead {
+  opacity: 0.4;
 }
 
-.app[data-phase="holding"] .target__brace {
-  stroke: rgba(201, 168, 106, 0.72);
+.app[data-phase="dragging"] .topbar,
+.app[data-phase="holding"] .topbar,
+.app[data-phase="dragging"] .foot,
+.app[data-phase="holding"] .foot {
+  opacity: 0.45;
 }
 
-@keyframes breathe {
-  0%,
-  100% {
-    opacity: 0.62;
-  }
-  50% {
-    opacity: 0.95;
-  }
+.app[data-phase="dragging"] .guidance,
+.app[data-phase="holding"] .guidance {
+  opacity: 0;
+}
+
+.app[data-phase="open"] .lead,
+.app[data-phase="open"] .topbar,
+.app[data-phase="open"] .foot {
+  opacity: 0.3;
+}
+
+.app[data-phase="open"] .rig {
+  opacity: 0.45;
 }
 
 /* --------------------------------------------------------------------------
-   التوجيه والتذييل
+   سطر القياس
    -------------------------------------------------------------------------- */
+
+.meter {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 11px;
+  border-top: 1px solid var(--line-soft);
+}
 
 .guidance {
   margin: 0;
-  max-width: 48ch;
-  text-align: center;
-  font-size: clamp(12.5px, 1.6vw, 14.5px);
-  line-height: 2;
-  color: var(--muted);
-  transition:
-    opacity var(--dur-med) var(--ease),
-    transform var(--dur-med) var(--ease),
-    filter var(--dur-med) var(--ease);
+  max-width: 56ch;
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: var(--ink-2);
+  transition: opacity var(--base) linear;
 }
+
+.readout {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.readout__value {
+  min-width: 3.4ch;
+  text-align: end;
+  font-weight: 600;
+  color: var(--signal);
+}
+
+/* --------------------------------------------------------------------------
+   التذييل
+   -------------------------------------------------------------------------- */
 
 .foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  transition: opacity var(--dur-slow) var(--ease);
+  padding-top: clamp(10px, 2vh, 18px);
+  transition: opacity var(--base) linear;
 }
 
 .foot__hint {
   margin: 0;
-  font-size: 11.5px;
-  color: var(--muted-dim);
+  font-size: 11px;
+  color: var(--ink-3);
 }
 
-.sound {
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(233, 227, 214, 0.1);
+.btn {
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
   background: transparent;
-  color: var(--muted);
+  color: var(--ink-2);
   font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.4;
   cursor: pointer;
   transition:
-    color 400ms var(--ease),
-    border-color 400ms var(--ease),
-    opacity 400ms var(--ease);
+    color var(--fast) linear,
+    border-color var(--fast) linear;
 }
 
-.sound:hover,
-.sound:focus-visible {
-  color: var(--bone);
-  border-color: rgba(201, 168, 106, 0.35);
-  outline: none;
+.btn:hover {
+  color: var(--ink);
+  border-color: #3a3d41;
 }
 
-.sound[aria-pressed="false"] {
-  opacity: 0.45;
+.btn:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 2px;
 }
 
-/* التركيز على العنصر النشط: كل ما عداه يخفت */
-.app[data-phase="dragging"] .masthead,
-.app[data-phase="holding"] .masthead {
-  opacity: 0.32;
+.btn[aria-pressed="false"] {
+  color: var(--ink-3);
 }
 
-.app[data-phase="dragging"] .guidance,
-.app[data-phase="holding"] .guidance {
-  opacity: 0;
-  transform: translateY(8px);
-  filter: blur(3px);
-}
-
-.app[data-phase="dragging"] .foot,
-.app[data-phase="holding"] .foot {
-  opacity: 0.3;
-}
-
-.app[data-phase="open"] .rig {
-  opacity: 0.4;
-  transform: translateY(-4px);
-}
-
-.app[data-phase="open"] .masthead,
-.app[data-phase="open"] .guidance {
-  opacity: 0;
-}
-
-.app[data-phase="open"] .vault {
-  border-color: rgba(201, 168, 106, 0.16);
-  box-shadow:
-    inset 0 0 140px rgba(0, 0, 0, 0.8),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 90px rgba(201, 168, 106, 0.06);
+.btn--wide {
+  width: 100%;
+  padding-block: 10px;
+  font-size: 12.5px;
 }
 
 /* --------------------------------------------------------------------------
-   شاشة الاكتمال
+   الاكتمال
    -------------------------------------------------------------------------- */
 
 .done {
@@ -632,197 +564,131 @@ button {
   z-index: 50;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 20px;
   opacity: 0;
-  transition: opacity var(--dur-slow) var(--ease);
+  transition: opacity var(--base) linear;
 }
 
 .done[hidden] {
   display: none;
 }
 
-.done.is-in {
+.done.is-on {
   opacity: 1;
 }
 
-.done:not(.is-in) {
+.done:not(.is-on) {
   pointer-events: none;
 }
 
-.done__backdrop {
+.done__scrim {
   position: absolute;
   inset: 0;
-  background: radial-gradient(70% 60% at 50% 45%, rgba(5, 6, 9, 0.62), rgba(2, 3, 5, 0.94));
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  background: rgba(6, 7, 8, 0.88);
 }
 
-.done__plate {
+.done__panel {
   position: relative;
-  width: min(440px, 88vw);
-  padding: clamp(30px, 5vw, 44px) clamp(22px, 4vw, 36px) clamp(26px, 4vw, 32px);
-  text-align: center;
-  border-radius: 5px;
-  border: 1px solid rgba(201, 168, 106, 0.2);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 30%),
-    linear-gradient(180deg, #14181d 0%, #0b0e12 62%, #080a0d 100%);
-  box-shadow:
-    0 50px 110px rgba(0, 0, 0, 0.75),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  transform: translateY(18px) scale(0.988);
-  transition: transform 1000ms var(--ease);
+  width: min(420px, 100%);
+  padding: 26px 24px 22px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--surface);
+  text-align: start;
 }
 
-.done.is-in .done__plate {
-  transform: none;
-}
-
-.done__plate .rivet {
-  opacity: 0.45;
-}
-
-.done__plate .rivet--tl,
-.done__plate .rivet--tr {
-  top: 12px;
-}
-
-.done__plate .rivet--bl,
-.done__plate .rivet--br {
-  bottom: 12px;
-}
-
-.done__plate .rivet--tl,
-.done__plate .rivet--bl {
-  inset-inline-start: 12px;
-}
-
-.done__plate .rivet--tr,
-.done__plate .rivet--br {
-  inset-inline-end: 12px;
-}
-
-.done__kicker {
-  margin: 0;
-  font-size: 11px;
-  color: var(--brass);
-  opacity: 0.6;
+.done__index {
+  margin: 0 0 14px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--signal);
 }
 
 .done__title {
-  margin: 16px 0 10px;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(26px, 4.4vw, 34px);
-  line-height: 1.6;
-  color: var(--bone);
+  margin: 0 0 8px;
+  font-size: clamp(22px, 3.6vw, 26px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
 }
 
 .done__sub {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(15px, 2vw, 17px);
-  line-height: 1.9;
-  color: var(--brass);
-}
-
-.done__rule {
-  height: 1px;
-  margin: 24px 0 18px;
-  background: linear-gradient(90deg, transparent, rgba(201, 168, 106, 0.32), transparent);
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--ink-2);
 }
 
 .done__next {
-  margin: 0;
-  font-size: 12.5px;
-  color: var(--muted);
-}
-
-.done__btn {
-  margin-top: 24px;
-  padding: 12px 28px;
-  border-radius: 3px;
-  border: 1px solid rgba(201, 168, 106, 0.32);
-  background: transparent;
-  color: var(--bone);
-  font-size: 13.5px;
-  cursor: pointer;
-  transition:
-    background 500ms var(--ease),
-    border-color 500ms var(--ease),
-    color 500ms var(--ease);
-}
-
-.done__btn:hover,
-.done__btn:focus-visible {
-  background: rgba(201, 168, 106, 0.09);
-  border-color: rgba(201, 168, 106, 0.6);
-  outline: none;
+  margin: 0 0 20px;
+  font-size: 11.5px;
+  color: var(--ink-3);
 }
 
 /* --------------------------------------------------------------------------
    الشاشات الصغيرة
    -------------------------------------------------------------------------- */
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
   .app {
-    gap: 10px;
-    padding-inline: 14px;
+    padding: 12px 14px;
   }
 
-  .notice {
-    top: max(78px, calc(env(safe-area-inset-top) + 74px));
-    width: calc(100vw - 28px);
+  .lead__title {
+    font-size: clamp(24px, 7.4vw, 32px);
   }
 
-  .notice__plate {
-    padding: 12px 26px;
+  .notice-slot {
+    min-height: 64px;
+    padding-block: 8px;
   }
 
-  .masthead__brand {
-    margin-bottom: 6px;
-    font-size: 10px;
+  .notice__text {
+    font-size: 12.5px;
   }
 
-  .rig-wrap {
+  .stage {
     gap: 18px;
+    padding-block: 10px;
   }
 
-  .foot {
-    justify-content: center;
+  .meter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .readout {
+    align-self: flex-end;
   }
 
   .foot__hint {
     display: none;
   }
+
+  .guidance {
+    font-size: 12px;
+  }
 }
 
-@media (max-height: 620px) and (min-width: 700px) {
-  .app {
-    grid-template-rows: auto 1fr auto;
-    padding-block: 10px;
-  }
-
-  .masthead__brand {
+@media (max-height: 620px) {
+  .foot__hint {
     display: none;
   }
-}
 
-/* --------------------------------------------------------------------------
-   تقليل الحركة
-   -------------------------------------------------------------------------- */
+  .notice-slot {
+    min-height: 40px;
+  }
+
+  .stage {
+    padding-block: 6px;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
-  }
-
-  .app[data-phase="holding"] .target__glow {
-    animation: none;
-    opacity: 0.9;
+    animation-duration: 0.001ms !important;
   }
 }
