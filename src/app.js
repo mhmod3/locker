@@ -20,9 +20,7 @@ let lastHasteAt = Number.NEGATIVE_INFINITY;
 let completionEpoch = 0;
 let lastTs = performance.now();
 
-function now() {
-  return performance.now();
-}
+const now = () => performance.now();
 
 function fractionFromClientX(clientX) {
   const ctm = svg.getScreenCTM();
@@ -36,7 +34,6 @@ function fractionFromClientX(clientX) {
 
 function onFail(event) {
   sound.play('fail');
-  renderer.knock();
   lastHasteAt = now();
 
   const sarcastic =
@@ -48,43 +45,46 @@ function onFail(event) {
 
 function onUnlock() {
   sound.play('unlock');
-  renderer.showNotice(STRINGS.success, 'success', { life: 3800 });
+  renderer.showNotice(STRINGS.success, 'success', { life: 3200 });
 
   const epoch = ++completionEpoch;
   window.setTimeout(() => {
     if (epoch !== completionEpoch) return;
     renderer.hideNotice();
     renderer.showCompletion();
-  }, 2300);
+  }, 1900);
 }
 
 function handleEvents(events) {
   for (const event of events) {
     switch (event.type) {
-      case 'grab':
-        break;
       case 'holdStart':
         sound.play('hold');
         break;
-      case 'recoil': {
+
+      case 'recoil':
         sound.play('recoil');
-        renderer.knock();
         if (now() - lastHasteAt > CONFIG.notice.hasteCooldownMs) {
           lastHasteAt = now();
-          renderer.showNotice(STRINGS.haste, 'warn', { life: 3400 });
+          renderer.showNotice(STRINGS.haste, 'warn', { life: 3200 });
         }
         break;
-      }
-      case 'provoke':
-        sound.play('provoke');
-        if (event.notice === 'provoke') renderer.showNotice(STRINGS.provoke, 'taunt');
+
+      case 'provoke': {
+        sound.play(event.kind);
+        const text = STRINGS[event.notice];
+        if (text) renderer.showNotice(text, 'taunt', { life: 3000 });
         break;
+      }
+
       case 'fail':
         onFail(event);
         break;
+
       case 'unlock':
         onUnlock();
         break;
+
       default:
         break;
     }
@@ -97,8 +97,7 @@ function handleEvents(events) {
 
 rig.addEventListener('pointerdown', (event) => {
   if (event.pointerType === 'mouse' && event.button !== 0) return;
-  const state = lock.snapshot();
-  if (state.phase === PHASE.OPEN) return;
+  if (lock.snapshot().phase === PHASE.OPEN) return;
 
   const fraction = fractionFromClientX(event.clientX);
   if (fraction === null) return;
@@ -183,8 +182,7 @@ document.getElementById('done')?.addEventListener('keydown', (event) => {
 });
 
 soundBtn?.addEventListener('click', () => {
-  const enabled = sound.toggle();
-  renderer.setSoundLabel(enabled);
+  renderer.setSoundLabel(sound.toggle());
 });
 
 /* --------------------------------------------------------------------------

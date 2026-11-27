@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
     />
-    <meta name="theme-color" content="#06070a" />
+    <meta name="theme-color" content="#0a0b0c" />
     <meta
       name="description"
       content="القفل الأول من لعبة الخزنة العنيدة: أوصل المزلاج إلى العلامة واثبت حتى يكتمل القفل."
@@ -14,37 +14,46 @@
     <title>الخزنة العنيدة — المزلاج الكتوم</title>
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2306080b'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23c9a86a' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23c9a86a'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0b0c'/%3E%3Cpath d='M6 12h20M6 20h20' stroke='%23d6a33f' stroke-width='2'/%3E%3C/svg%3E"
+    />
+    <link
+      rel="preload"
+      href="./assets/fonts/plex-arabic-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="./assets/fonts/plex-arabic-600.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <link rel="stylesheet" href="./src/style.css" />
   </head>
 
   <body>
     <main class="app" id="app" data-phase="idle">
-      <div class="vault" aria-hidden="true">
-        <span class="rivet rivet--tl"></span>
-        <span class="rivet rivet--tr"></span>
-        <span class="rivet rivet--bl"></span>
-        <span class="rivet rivet--br"></span>
-        <span class="vault__seam"></span>
-      </div>
+      <div class="frame" aria-hidden="true"></div>
 
-      <header class="masthead">
-        <p class="masthead__brand" data-string="gameTitle"></p>
-        <h1 class="masthead__title">
-          <span class="masthead__lock" data-string="lockKicker"></span>
-          <span class="masthead__dot" aria-hidden="true">·</span>
-          <span class="masthead__name" data-string="lockName"></span>
-        </h1>
+      <header class="topbar">
+        <span class="topbar__brand" data-string="gameTitle"></span>
+        <span class="topbar__rule" aria-hidden="true"></span>
+        <span class="topbar__index" data-string="lockIndex"></span>
       </header>
 
-      <div class="notice" id="notice" role="status" aria-live="polite" aria-atomic="true">
-        <div class="notice__plate">
+      <div class="notice-slot">
+        <div class="notice" id="notice" role="status" aria-live="polite" aria-atomic="true">
           <p class="notice__text" id="noticeText"></p>
         </div>
       </div>
 
-      <section class="rig-wrap">
+      <div class="lead">
+        <h1 class="lead__title" data-string="lockName"></h1>
+      </div>
+
+      <section class="stage">
         <div
           class="rig"
           id="rig"
@@ -57,136 +66,93 @@
           aria-valuenow="0"
           aria-valuetext=""
         >
-          <svg class="rig__svg" viewBox="0 0 1000 300" aria-hidden="true" focusable="false">
+          <svg class="rig__svg" viewBox="0 0 1000 260" aria-hidden="true" focusable="false">
             <defs>
               <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#8b939a" />
-                <stop offset="0.12" stop-color="#c3c9ce" />
-                <stop offset="0.42" stop-color="#838b92" />
-                <stop offset="0.66" stop-color="#656d74" />
-                <stop offset="1" stop-color="#3a4047" />
+                <stop offset="0" stop-color="#a7adb2" />
+                <stop offset="0.16" stop-color="#cfd4d8" />
+                <stop offset="0.5" stop-color="#8f969c" />
+                <stop offset="1" stop-color="#5a6066" />
               </linearGradient>
-
-              <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#ffffff" stop-opacity="0.34" />
-                <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
-              </linearGradient>
-
-              <radialGradient id="brass" cx="0.35" cy="0.3" r="0.8">
-                <stop offset="0" stop-color="#f0d7a2" />
-                <stop offset="0.5" stop-color="#c9a86a" />
-                <stop offset="1" stop-color="#7c6431" />
-              </radialGradient>
-
-              <linearGradient id="brassLine" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#7d6535" />
-                <stop offset="0.5" stop-color="#e6c98e" />
-                <stop offset="1" stop-color="#8d7442" />
-              </linearGradient>
-
-              <linearGradient id="plateFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#12171d" />
-                <stop offset="0.5" stop-color="#0d1116" />
-                <stop offset="1" stop-color="#080b0e" />
-              </linearGradient>
-
-              <linearGradient id="grooveFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#000000" />
-                <stop offset="0.3" stop-color="#070a0d" />
-                <stop offset="0.78" stop-color="#0e1217" />
-                <stop offset="1" stop-color="#171c22" />
-              </linearGradient>
-
-              <linearGradient id="grooveShade" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#000000" stop-opacity="0.95" />
-                <stop offset="1" stop-color="#000000" stop-opacity="0" />
-              </linearGradient>
-
-              <radialGradient id="targetGlow">
-                <stop offset="0" stop-color="#e0b577" stop-opacity="0.26" />
-                <stop offset="0.6" stop-color="#c9a86a" stop-opacity="0.09" />
-                <stop offset="1" stop-color="#c9a86a" stop-opacity="0" />
-              </radialGradient>
-
-              <radialGradient id="chargeGlow">
-                <stop offset="0" stop-color="#e0b577" stop-opacity="0.22" />
-                <stop offset="0.55" stop-color="#c9a86a" stop-opacity="0.07" />
-                <stop offset="1" stop-color="#c9a86a" stop-opacity="0" />
-              </radialGradient>
-
-              <filter id="boltShadow" x="-60%" y="-60%" width="220%" height="240%">
-                <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#000000" flood-opacity="0.62" />
-              </filter>
             </defs>
 
-            <!-- المسار: صفيحة غائرة وحافة مشطوفة -->
-            <g class="rail">
-              <rect class="rail__plate" x="56" y="126" width="888" height="88" rx="16" />
-              <rect class="rail__lip" x="82" y="144" width="836" height="52" rx="26" />
-              <rect class="rail__groove" x="84" y="146" width="832" height="48" rx="24" />
-              <rect class="rail__shade" x="84" y="146" width="832" height="22" rx="11" />
-              <g class="ticks" id="ticks"></g>
-              <g class="start-mark" id="startMark">
-                <line x1="756" y1="200" x2="756" y2="210" />
-              </g>
+            <g class="bed">
+              <rect class="bed__plate" x="52" y="118" width="896" height="100" />
+              <line class="bed__edge" x1="52" y1="118.5" x2="948" y2="118.5" />
             </g>
 
-            <!-- علامة الهدف -->
-            <g transform="translate(324 170)">
-              <g class="target" id="target">
-                <ellipse class="target__glow" cx="0" cy="0" rx="66" ry="31" />
-                <path class="target__brace" d="M-48 -44 V44 M48 -44 V44" />
-                <path class="target__cap" d="M-48 -44 H-60 M48 -44 H60 M-48 44 H-60 M48 44 H60" />
-                <line class="target__axis" x1="0" y1="-40" x2="0" y2="40" />
-              </g>
-            </g>
-            <text class="target__label" id="targetLabel" x="324" y="242" data-string="targetLabel"></text>
+            <rect class="slot" x="96" y="146" width="808" height="48" rx="24" />
+            <rect class="slot__bevel" x="97" y="147" width="806" height="46" rx="23" />
+            <g class="ticks" id="ticks"></g>
 
-            <!-- المزلاج -->
+            <g class="target-fill" id="targetFill" transform="translate(324 170)">
+              <rect class="target__fill" x="-48" y="-24" width="96" height="48" />
+              <line class="target__base" x1="-48" y1="23" x2="48" y2="23" vector-effect="non-scaling-stroke" />
+            </g>
+
+            <g class="decoy" id="decoy" transform="translate(600 170)">
+              <rect class="decoy__fill" x="-48" y="-24" width="96" height="48" />
+              <path
+                class="decoy__mark"
+                d="M-48 -34 V34 M48 -34 V34 M-58 -34 H-42 M42 -34 H58 M-58 34 H-42 M42 34 H58"
+                vector-effect="non-scaling-stroke"
+              />
+            </g>
+
             <g class="bolt" id="bolt" transform="translate(756 170)">
-              <circle class="bolt__halo" cx="0" cy="0" r="92" />
-              <circle class="bolt__ring-track" cx="0" cy="0" r="58" />
-              <circle class="bolt__ring" id="ring" cx="0" cy="0" r="58" transform="rotate(-90)" />
-              <g class="bolt__body" filter="url(#boltShadow)">
-                <path class="bolt__plate" d="M-30 -30 H30 L40 -20 V20 L30 30 H-30 L-40 20 V-20 Z" />
-                <path class="bolt__sheen" d="M-32 -24 H32 L35 -20 V-16 H-35 V-20 Z" />
-                <line class="bolt__score" x1="-24" y1="12" x2="24" y2="12" />
-                <circle class="bolt__pin" cx="0" cy="0" r="8" />
-                <circle class="bolt__pin-core" cx="0" cy="0" r="2.6" />
-                <circle class="bolt__stud" cx="-30" cy="0" r="2" />
-                <circle class="bolt__stud" cx="30" cy="0" r="2" />
-              </g>
+              <circle class="bolt__ring" id="ring" cx="0" cy="0" r="54" transform="rotate(-90)" />
+              <path
+                class="bolt__shadow"
+                d="M-28 -28 H28 L36 -20 V20 L28 28 H-28 L-36 20 V-20 Z"
+                transform="translate(0 3)"
+              />
+              <path class="bolt__plate" d="M-28 -28 H28 L36 -20 V20 L28 28 H-28 L-36 20 V-20 Z" />
+              <line class="bolt__sheen" x1="-30" y1="-24" x2="30" y2="-24" />
+              <g class="bolt__knurl" id="knurl"></g>
+              <circle class="bolt__screw" cx="-23" cy="0" r="2.4" />
+              <circle class="bolt__screw" cx="23" cy="0" r="2.4" />
             </g>
+
+            <g class="target-marks" id="targetMarks" transform="translate(324 170)">
+              <path
+                class="target__mark"
+                d="M-48 -34 V34 M48 -34 V34 M-58 -34 H-42 M42 -34 H58 M-58 34 H-42 M42 34 H58"
+                vector-effect="non-scaling-stroke"
+              />
+            </g>
+
+            <line class="start-mark" id="startMark" x1="756" y1="200" x2="756" y2="210" />
           </svg>
         </div>
 
-        <p class="guidance" id="guidance" data-string="guidance"></p>
+        <div class="meter">
+          <p class="guidance" id="guidance" data-string="guidance"></p>
+          <p class="readout">
+            <span class="readout__label" data-string="readout"></span>
+            <span class="readout__value" id="readoutValue">٠٪</span>
+          </p>
+        </div>
       </section>
 
       <footer class="foot">
-        <button class="sound" id="soundBtn" type="button" aria-pressed="true" data-string="soundOn"></button>
+        <button class="btn" id="soundBtn" type="button" aria-pressed="true"></button>
         <p class="foot__hint" data-string="hint"></p>
       </footer>
 
       <div class="done" id="done" hidden>
-        <div class="done__backdrop" id="doneBackdrop"></div>
+        <div class="done__scrim" id="doneScrim"></div>
         <div
-          class="done__plate"
+          class="done__panel"
           role="dialog"
           aria-modal="true"
           aria-labelledby="doneTitle"
           aria-describedby="doneSub"
         >
-          <span class="rivet rivet--tl"></span>
-          <span class="rivet rivet--tr"></span>
-          <span class="rivet rivet--bl"></span>
-          <span class="rivet rivet--br"></span>
-          <p class="done__kicker" data-string="lockKicker"></p>
+          <p class="done__index" data-string="lockIndex"></p>
           <h2 class="done__title" id="doneTitle" data-string="completionTitle"></h2>
           <p class="done__sub" id="doneSub" data-string="completionSubtitle"></p>
-          <div class="done__rule" aria-hidden="true"></div>
           <p class="done__next" data-string="nextLock"></p>
-          <button class="done__btn" id="replayBtn" type="button" data-string="replay"></button>
+          <button class="btn btn--wide" id="replayBtn" type="button" data-string="replay"></button>
         </div>
       </div>
 
